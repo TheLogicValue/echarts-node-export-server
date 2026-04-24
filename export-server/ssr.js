@@ -20,6 +20,54 @@ const { createCanvas } = require('canvas');
 const echarts = require('./echarts.v5.6.0.min.js');
 
 
+function parseFormatterFunction(formatter) {
+  if (typeof formatter !== 'string') {
+    return null;
+  }
+
+  const trimmed = formatter.trim();
+  if (!trimmed.includes('=>') && !trimmed.startsWith('function')) {
+    return null;
+  }
+
+  try {
+    const fn = Function('"use strict"; return (' + trimmed + ');')();
+    if (typeof fn === 'function') {
+      return fn;
+    }
+  } catch (e) {
+    // Keep original formatter value when parsing fails.
+  }
+  return null;
+}
+
+
+function reviveFormatterFunctions(options) {
+  if (Array.isArray(options)) {
+    for (const item of options) {
+      reviveFormatterFunctions(item);
+    }
+    return;
+  }
+
+  if (options === null || typeof options !== 'object') {
+    return;
+  }
+
+  for (const key of Object.keys(options)) {
+    const value = options[key];
+    if (key === 'formatter') {
+      const parsed = parseFormatterFunction(value);
+      if (parsed !== null) {
+        options[key] = parsed;
+      }
+      continue;
+    }
+    reviveFormatterFunctions(value);
+  }
+}
+
+
 /* Renders JSON data for a ECharts plot into a SVG image.
 
    Parameters:
@@ -112,6 +160,7 @@ exports.render = function(jsonData, do_svg, width, height) {
   }
 
   const json_object = JSON.parse(jsonData);
+  reviveFormatterFunctions(json_object);
 
   const parsed_width = parseInt(width, 10);
   if (isNaN(parsed_width) || parsed_width <= 0) {

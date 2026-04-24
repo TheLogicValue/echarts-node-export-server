@@ -385,5 +385,51 @@ describe('server', () => {
         });
       });
     });
+
+    it('request with formatter function string is successful', () => {
+      const options = {
+        port: 3000,
+        host: 'localhost',
+        method: 'POST',
+        headers: {
+          'X-Image-Format': 'svg'
+        }
+      };
+
+      const req = http.request(options);
+      const payload = JSON.stringify({
+        backgroundColor: '#ffffff',
+        xAxis: {
+          type: 'category',
+          data: ['A', 'B']
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          max: 100,
+          interval: 50,
+          axisLabel: {
+            formatter: "function (value) { return value + ' €'; }"
+          }
+        },
+        series: [{
+          type: 'line',
+          data: [25, 75]
+        }]
+      });
+      req.write(payload);
+      req.end();
+
+      req.on('response', (response) => {
+        assert.strictEqual(200, response.statusCode);
+        let body = '';
+        response.on('data', (chunk) => {
+          body += chunk;
+        });
+        response.on('end', () => {
+          assert.ok(body.indexOf('>50 €<') > 0);
+        });
+      });
+    });
   });
 });
