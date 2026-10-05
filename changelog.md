@@ -13,6 +13,11 @@ change in this application.
 ## Next Version (2026-09-??)
 
 * __[feature, fork]__
+Add optional `AUTH_TOKEN` authentication for all HTTP requests, including the
+root rendering API and MCP. Require the matching `X-Auth-Token` header when
+configured; leave authentication disabled when unset or empty.
+
+* __[feature, fork]__
 Add stateless Streamable HTTP MCP at `/mcp` with `render_chart`, inline PNG/SVG
 results, loopback Host/Origin defaults and MCP-specific resource limits.
 Require Node.js >=20 and use the official MCP SDK v2. Dispose rendered ECharts

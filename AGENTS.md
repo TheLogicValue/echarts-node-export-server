@@ -12,6 +12,7 @@ as JSON and returns a PNG or SVG image. The application lives in
 - `echarts.v5.6.0.min.js`: vendored library; do not edit it manually.
 - `package.json` and `package-lock.json`: npm dependencies, including `canvas`.
 - `tests/server.test.js` and `tests/charts/`: HTTP and chart tests.
+- `tests/auth.test.js`: optional token authentication on the real server.
 - `test.sh`: Linux test helper.
 - `Dockerfile`, `.github/workflows/` and `.gitlab-ci.yml`: image and CI.
 - `readme.md` and `documentation/`: public documentation.
@@ -58,6 +59,11 @@ Example images in `documentation/` must remain versioned.
 
 ## Behavior to preserve
 
+- Optional `AUTH_TOKEN` protects every HTTP request, including `/`, `/mcp`
+  and `OPTIONS`, before routing or parsing. Unset or empty disables it.
+  Require exactly one matching `X-Auth-Token` header; otherwise return 403.
+  Compare fixed-size token hashes with `timingSafeEqual`, keep token values
+  out of logs and responses, and retain MCP Host/Origin checks.
 - The legacy rendering endpoint is `POST /`; `OPTIONS /` returns 204 and
   `Allow: POST`. Other methods on `/` return 405.
 - `/mcp` serves the official SDK v2 Streamable HTTP tool `render_chart`.
@@ -79,7 +85,8 @@ Example images in `documentation/` must remain versioned.
 
 Stringified `formatter` functions are evaluated using `Function` inside the
 process, without a sandbox. Do not describe untrusted input as safe.
-The server does not implement authentication, TLS or CORS. The root body limit
+The server offers optional shared-token authentication, but no TLS or CORS.
+Authentication does not sandbox formatter functions. The root body limit
 uses string length, and there is no maximum image dimension or rendering
 timeout. Review these points when changing exposure or validation.
 Root rendering errors may throw uncaught exceptions; do not promise an HTTP

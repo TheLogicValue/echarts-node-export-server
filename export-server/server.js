@@ -19,10 +19,15 @@
 "use strict";
 
 const http = require('http');
+const { createHash, timingSafeEqual } = require('node:crypto');
 const path = require('path');
 const ssr = require('./ssr.js');
 const url = require('url');
 const mcp = require('./mcp.js').createEndpoint();
+
+// An unset or empty token keeps the existing unauthenticated behavior.
+const tokenHash = process.env.AUTH_TOKEN ?
+  createHash('sha256').update(process.env.AUTH_TOKEN).digest() : undefined;
 
 // Use hostname from environment variable HOST, if it is set.
 const hostname = process.env.HOST || 'localhost';
@@ -42,6 +47,20 @@ const port = (parsedPort && parsedPort > 0 && parsedPort < 65536) ? parsedPort :
 
 
 const server = http.createServer(function(req, res) {
+  if (tokenHash) {
+    const token = req.headers['x-auth-token'];
+    let tokenHeaders = 0;
+    for (let i = 0; i < req.rawHeaders.length; i += 2) {
+      if (req.rawHeaders[i].toLowerCase() === 'x-auth-token') tokenHeaders++;
+    }
+    if (tokenHeaders !== 1 || typeof token !== 'string' ||
+        !timingSafeEqual(tokenHash,
+          createHash('sha256').update(token).digest())) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden.\n');
+      return;
+    }
+  }
   // ---- Handle invalid URL requests ----
   const file = url.parse(req.url);
   if (file.pathname === '/mcp') {

@@ -49,7 +49,16 @@ and ECharts template strings remain supported. Input validation and limits do
 not make untrusted formatters safe. Rendering is synchronous: a formatter can
 block the event loop; there is no cancellable rendering timeout or worker pool.
 
-There is no built-in authentication, TLS or CORS. Default MCP Host validation
+Optional `AUTH_TOKEN` authentication protects `/mcp` and the original root
+API. Set a non-empty value in the server environment and send exactly one
+matching `X-Auth-Token` header on every request. Missing, incorrect or duplicate
+headers return 403 before MCP dispatch. Unset or empty disables authentication.
+Token values are case-sensitive and read at startup; changes require a restart.
+See [Optional authentication](../readme.md#optional-authentication) for server
+and Docker setup. A valid token does not bypass Host/Origin checks or sandbox
+formatters. Use trusted clients and HTTPS when transmitting tokens.
+
+There is no built-in TLS or CORS. Default MCP Host validation
 allows `localhost`, `127.0.0.1` and `[::1]`, with any valid port. Default
 Origin validation allows HTTP/HTTPS origins on those loopback hostnames, with
 any port. Native clients may omit Origin. A supplied invalid or empty Origin
@@ -72,14 +81,15 @@ HTTP/HTTPS origins, including a non-default port when needed. Scheme and port
 must match exactly; omit paths and trailing slashes. Use lowercase canonical
 URLs and omit default ports. Omitted Origin remains accepted. Wildcards,
 empty entries and malformed values fail startup. These checks protect only
-`/mcp`; the root API retains its existing access behavior. This configuration
-is not approval for public exposure or a replacement for authentication.
+`/mcp`; shared-token authentication, when enabled, also protects the root API.
+Host/Origin allowlists are not a replacement for authentication.
 
 ## SDK client smoke example
 
 The development dependency `@modelcontextprotocol/client` is installed by
 `npm ci`. With the server running, save or execute this CommonJS example from
-`export-server/`:
+`export-server/`. If the server requires a token, also set `AUTH_TOKEN` in the
+client's environment; the example sends it through the transport headers:
 
 ```js
 const { Client, StreamableHTTPClientTransport } =
@@ -91,7 +101,12 @@ async function main() {
   });
   try {
     await client.connect(new StreamableHTTPClientTransport(
-      new URL('http://localhost:3000/mcp')));
+      new URL('http://localhost:3000/mcp'), {
+        requestInit: {
+          headers: process.env.AUTH_TOKEN ?
+            { 'X-Auth-Token': process.env.AUTH_TOKEN } : {}
+        }
+      }));
     console.log(await client.listTools());
     const result = await client.callTool({
       name: 'render_chart',

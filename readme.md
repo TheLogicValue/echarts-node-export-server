@@ -132,6 +132,46 @@ container, also update the container port in `-p`. Stop the foreground container
 with Ctrl+C. See [Setup with Docker](./documentation/docker.md) for the existing
 Linux host-network setup.
 
+### Optional authentication
+
+Set `AUTH_TOKEN` before starting the server to require a shared token:
+
+```sh
+export AUTH_TOKEN='replace-with-your-own-token'
+npm start
+```
+
+In PowerShell:
+
+```powershell
+$env:AUTH_TOKEN = 'replace-with-your-own-token'
+npm start
+```
+
+When `AUTH_TOKEN` is unset or empty, authentication is disabled. Otherwise,
+every request, including `/`, `/mcp`, unknown paths and `OPTIONS`, requires
+exactly one `X-Auth-Token` header matching the configured value. Header names
+are case-insensitive; token values are case-sensitive. Missing, incorrect or
+duplicate headers return HTTP 403 before routing, parsing or rendering.
+The server reads the token at startup; changing it requires a restart.
+
+For a chart saved as `chart.json`, add the header to the existing root API:
+
+```sh
+curl http://localhost:3000/ \
+  -H "X-Auth-Token: $AUTH_TOKEN" \
+  -H 'Content-Type: application/json' \
+  --data-binary @chart.json --output chart.png
+```
+
+For Docker, export `AUTH_TOKEN` in the host environment and pass it through
+with `-e AUTH_TOKEN`, in addition to the existing options. Do not bake a token
+into the image. For MCP clients, configure the same header on every request;
+see the [SDK example](./documentation/mcp.md#sdk-client-smoke-example).
+MCP Host/Origin allowlists still apply even with a valid token. Shared-token
+authentication does not sandbox formatters; use trusted clients and HTTPS
+when sending a token over a network. The server does not provide TLS or CORS.
+
 ## Usage
 
 To generate a PNG file of an ECharts plot, just send an HTTP POST request to the
@@ -290,11 +330,14 @@ as functions also remain unchanged.
 
 **Use trusted chart input.** Function strings are evaluated using JavaScript's
 `Function` constructor in the server process, without a sandbox. The server
-provides no authentication or TLS. Restrict access when binding beyond
-localhost. The request-size check does not impose a maximum image dimension
-or a rendering timeout.
+supports optional `AUTH_TOKEN` authentication and provides no TLS. Restrict
+access when binding beyond localhost. The root request-size check does not
+impose a maximum image dimension or a rendering timeout.
 
 ### HTTP behavior
+
+With `AUTH_TOKEN` configured, authentication failures return 403 before the
+following routing and rendering behavior applies:
 
 | Request or condition | Response |
 | -------------------- | -------- |
