@@ -168,9 +168,10 @@ For Docker, export `AUTH_TOKEN` in the host environment and pass it through
 with `-e AUTH_TOKEN`, in addition to the existing options. Do not bake a token
 into the image. For MCP clients, configure the same header on every request;
 see the [SDK example](./documentation/mcp.md#sdk-client-smoke-example).
-MCP Host/Origin allowlists still apply even with a valid token. Shared-token
-authentication does not sandbox formatters; use trusted clients and HTTPS
-when sending a token over a network. The server does not provide TLS or CORS.
+MCP Host syntax, configured Host allowlists and Origin checks still apply even
+with a valid token. Shared-token authentication does not sandbox formatters;
+use trusted clients and HTTPS when sending a token over a network. The server
+does not provide TLS or CORS.
 
 ## Usage
 

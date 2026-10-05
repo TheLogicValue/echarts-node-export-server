@@ -204,8 +204,9 @@ test('methods, invalid headers, malformed messages and body limits',
     for (const method of ['GET', 'DELETE', 'OPTIONS']) {
       assert.equal((await raw(undefined, {}, method)).status, 405);
     }
-    for (const headers of [{ Host: 'attacker.example' },
-      { Host: 'localhost/extra' }, { Host: 'user@localhost' },
+    for (const headers of [{ Host: 'localhost/extra' },
+      { Host: 'user@localhost' }, { Host: 'bad..example' },
+      { Host: 'localhost:99999' },
       { Origin: '' },
       { Origin: 'https://attacker.example' }, { Origin: 'null' },
       { Origin: 'ftp://localhost' }]) {
@@ -232,6 +233,18 @@ test('allowlist startup validation rejects invalid configuration', () => {
     'https://host/path', 'ftp://host', 'https://user@host']) {
     assert.throws(() => createEndpoint({ MCP_ALLOWED_ORIGINS: value }));
   }
+});
+
+test('unset Host allowlist accepts valid domains and IP addresses', async () => {
+  const initialize = { jsonrpc: '2.0', id: 79, method: 'initialize',
+    params: { protocolVersion: '2025-11-25', capabilities: {},
+      clientInfo: { name: 'host-test', version: '1.0' } } };
+  for (const host of ['charts.example', 'charts.example.', '127.0.0.2',
+    '[2001:db8::1]']) {
+    assert.equal((await raw(initialize, { Host: host })).status, 200);
+  }
+  assert.equal((await raw('{', { Host: 'charts.example',
+    Origin: 'https://charts.example' })).status, 403);
 });
 
 test('oversized chunked upload is rejected before upload completion',
@@ -294,6 +307,9 @@ test('explicit internal allowlists retain scheme and port restrictions',
     await once(local, 'listening');
     const target = 'http://127.0.0.1:' + local.address().port + '/mcp';
     try {
+      assert.equal((await raw('{', { Host: 'other.example',
+        Origin: 'https://internal.example:8443' }, 'POST', target)).status,
+        403);
       for (const origin of ['http://internal.example:8443',
         'https://internal.example', 'https://internal.example:9443']) {
         assert.equal((await raw({}, { Host: 'internal.example',

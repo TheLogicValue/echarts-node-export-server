@@ -59,12 +59,16 @@ See [Optional authentication](../readme.md#optional-authentication) for server
 and Docker setup. A valid token does not bypass Host/Origin checks or sandbox
 formatters. Use trusted clients and HTTPS when transmitting tokens.
 
-There is no built-in TLS or CORS. Default MCP Host validation
-allows `localhost`, `127.0.0.1` and `[::1]`, with any valid port. Default
-Origin validation allows HTTP/HTTPS origins on those loopback hostnames, with
-any port. Native clients may omit Origin. A supplied invalid or empty Origin
+There is no built-in TLS or CORS. When `MCP_ALLOWED_HOSTS` is unset, MCP accepts
+any syntactically valid Host domain or IP address, with a valid port if present.
+Default Origin validation allows HTTP/HTTPS origins on `localhost`,
+`127.0.0.1` and `[::1]`, with any port. Native clients may omit Origin.
+A supplied invalid or empty Origin
 is rejected. Invalid Host/Origin values return 403 before rendering. Binding
 `HOST=0.0.0.0` does not disable these checks; forwarded headers are not trusted.
+With no `AUTH_TOKEN` and an externally reachable listener, any native client
+can call MCP. Formatter functions execute in this server process, so external
+access requires a trusted client boundary and token protection.
 
 To select intentional internal names, configure comma-separated allowlists:
 
@@ -75,7 +79,7 @@ MCP_ALLOWED_ORIGINS=https://app.internal.example:8443 \
 npm start
 ```
 
-`MCP_ALLOWED_HOSTS` replaces the default host list and contains hostnames
+`MCP_ALLOWED_HOSTS` restricts the accepted Hosts and contains hostnames
 without ports or schemes (IPv6 addresses require brackets).
 `MCP_ALLOWED_ORIGINS` replaces default origins and contains exact canonical
 HTTP/HTTPS origins, including a non-default port when needed. Scheme and port

@@ -179,9 +179,13 @@ for (const mode of ['modern', 'legacy']) {
   });
 }
 
-test('valid token does not bypass MCP Host/Origin validation', async t => {
+test('valid token keeps MCP Host syntax and Origin validation', async t => {
   const base = await startServer(t, token);
-  for (const forbidden of [{ Host: 'untrusted.example' },
+  const accepted = await request(base, '/mcp', { 'X-Auth-Token': token,
+    Host: 'untrusted.example', 'Content-Type': 'application/json',
+    Accept: 'application/json, text/event-stream' }, '{');
+  assert.equal(accepted.status, 400);
+  for (const forbidden of [{ Host: 'bad..example' },
     { Origin: 'https://untrusted.example' }]) {
     const response = await request(base, '/mcp', {
       'X-Auth-Token': token, ...forbidden

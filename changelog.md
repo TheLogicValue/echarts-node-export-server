@@ -12,6 +12,10 @@ change in this application.
 
 ## Next Version (2026-09-??)
 
+* __[feature, fork]__
+Accept any valid MCP Host domain or IP when `MCP_ALLOWED_HOSTS` is unset;
+continue enforcing explicit Host lists and Origin validation when configured.
+
 * __[maintenance, fork]__
 Use the WHATWG URL API for request routing and the MCP SDK's automatic
 response mode, avoiding Node.js deprecation and dropped-notification warnings.
@@ -23,7 +27,7 @@ configured; leave authentication disabled when unset or empty.
 
 * __[feature, fork]__
 Add stateless Streamable HTTP MCP at `/mcp` with `render_chart`, inline PNG/SVG
-results, loopback Host/Origin defaults and MCP-specific resource limits.
+results, Host/Origin validation and MCP-specific resource limits.
 Require Node.js >=20 and use the official MCP SDK v2. Dispose rendered ECharts
 instances after successful or failed rendering.
 

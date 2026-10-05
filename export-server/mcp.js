@@ -110,6 +110,20 @@ function validHostname(value) {
     /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label));
 }
 
+function validHostHeader(value) {
+  if (typeof value !== 'string' ||
+      !/^(?:\[[0-9a-f:.]+\]|[a-z0-9.-]+)(?::[0-9]+)?$/i.test(value)) {
+    return false;
+  }
+  try {
+    const hostname = new URL('http://' + value).hostname;
+    return validHostname(hostname.endsWith('.') ?
+      hostname.slice(0, -1) : hostname);
+  } catch (error) {
+    return false;
+  }
+}
+
 function validOrigin(value) {
   try {
     const origin = new URL(value);
@@ -122,11 +136,11 @@ function validOrigin(value) {
 
 function createEndpoint(env = process.env) {
   const hosts = parseList(env.MCP_ALLOWED_HOSTS, 'MCP_ALLOWED_HOSTS',
-    validHostname) || LOOPBACK;
+    validHostname);
   const origins = parseList(env.MCP_ALLOWED_ORIGINS, 'MCP_ALLOWED_ORIGINS',
     validOrigin);
-  const validateHost = hostHeaderValidation(hosts.map(host =>
-    new URL('http://' + host).hostname));
+  const validateHost = hosts ? hostHeaderValidation(hosts.map(host =>
+    new URL('http://' + host).hostname)) : () => true;
   const validateOrigin = originValidation(origins ?
     origins.map(origin => new URL(origin).hostname) : LOOPBACK);
   const handler = createMcpHandler(createChartServer, {
@@ -138,8 +152,7 @@ function createEndpoint(env = process.env) {
     async handle(req, res) {
       const host = req.headers.host;
       const origin = req.headers.origin;
-      if (typeof host !== 'string' ||
-          !/^(?:\[[0-9a-f:.]+\]|[a-z0-9.-]+)(?::[0-9]+)?$/i.test(host) ||
+      if (!validHostHeader(host) ||
           (origin !== undefined && (typeof origin !== 'string' ||
             !validOrigin(origin)))) {
         res.writeHead(403, { 'Content-Type': 'text/plain' });

@@ -72,9 +72,10 @@ Example images in `documentation/` must remain versioned.
   bytes, 4096 pixels per dimension and 8,388,608 total pixels. Validate Host,
   supplied Origin and selected integer dimensions before formatter execution.
   Keep SDK protocol handling and a fresh server factory per request.
-- Default MCP allowlists permit loopback hosts and HTTP/HTTPS loopback
-  origins. Explicit origins match exact scheme/host/port. See
-  `documentation/mcp.md` for configuration. These guards apply only to MCP.
+- Without `MCP_ALLOWED_HOSTS`, MCP accepts any syntactically valid Host
+  domain or IP. An explicit list restricts Hosts. Supplied Origins still
+  default to HTTP/HTTPS loopback; explicit origins match exact scheme/host/port.
+  See `documentation/mcp.md` for configuration. These guards apply only to MCP.
 - `HOST` defaults to `localhost`; `PORT` defaults to 3000.
 - PNG is the default format. Only `X-Image-Format: svg` selects SVG.
 - Default dimensions are 700 x 400. Valid `X-Image-Width` / `X-Image-Height`
