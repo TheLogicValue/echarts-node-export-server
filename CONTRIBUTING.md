@@ -36,8 +36,19 @@ To summarize:
 
 ## Styleguides
 
+### Project Language
+
+* Use English throughout the project, matching the upstream repository.
+* Write documentation, agent instructions, code comments, test descriptions,
+  log messages and error messages in English.
+* Use English for new identifiers, commit messages, pull request titles and
+  descriptions, following existing conventions.
+* Preserve literal data, API names, third-party content and test fixtures when
+  translation would change their meaning or behavior.
+
 ### Git Commit Messages
 
+* Write commit messages in English.
 * Use the present tense ("Add feature" not "Added feature").
 * Use the imperative mood ("Move cursor to..." not "Moves cursor to...").
 * Limit all lines of the commit message to 65 characters or less.

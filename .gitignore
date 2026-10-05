@@ -1,7 +1,34 @@
 # Node.js modules
 node_modules/
 
-# generated PNG files
+# npm cache and diagnostic logs
+.npm/
+npm-debug.log*
+*.log
+
+# Local environment files; keep shareable templates visible
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.*.sample
+
+# Test coverage and caches
+coverage/
+.nyc_output/
+.cache/
+
+# Generated chart images; documentation examples belong in version control
 *.png
-# generated PNG files
 *.svg
+!/documentation/**/*.png
+!/documentation/**/*.svg
+
+# OS metadata and editor temporary files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

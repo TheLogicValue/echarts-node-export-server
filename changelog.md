@@ -10,19 +10,31 @@ Since [ECharts](https://echarts.apache.org/) is the main dependency of this
 application, major version changes in ECharts will also trigger a major version
 change in this application.
 
-## Next Version (2025-11-??)
+## Next Version (2026-09-??)
+
+* __[maintenance]__
+Update dependency `node-abi` to 3.96.0.
+
+## Version 7.0.13 (2026-07-17)
+
+* __[maintenance]__
+Update Dockerfile to use Node.js 24 instead of Node.js 22.
+Furthermore, the base image is updated from Debian 12 to Debian 13.
 
 * __[maintenance]__
 Update dependency `canvas` to 3.2.3.
 
 * __[maintenance]__
-Update dependency `node-abi` to 3.89.0.
+Update dependency `node-abi` to 3.94.0.
 
 * __[maintenance]__
 Update dependency `pump` to 3.0.4.
 
 * __[maintenance]__
-Update dependency `semver` to 7.7.4.
+Update dependency `semver` to 7.8.5.
+
+* __[maintenance]__
+Update dependency `tar-fs` to 2.1.5.
 
 ## Version 7.0.12 (2025-10-13)
 
