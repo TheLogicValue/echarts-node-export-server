@@ -8,6 +8,7 @@ as JSON and returns a PNG or SVG image. The application lives in
 
 - `server.js`: HTTP methods and paths, request bodies, headers and responses.
 - `ssr.js`: dimensions, formatter function revival and rendering.
+- `mcp.js`: Streamable HTTP MCP tool, validation and resource limits.
 - `echarts.v5.6.0.min.js`: vendored library; do not edit it manually.
 - `package.json` and `package-lock.json`: npm dependencies, including `canvas`.
 - `tests/server.test.js` and `tests/charts/`: HTTP and chart tests.
@@ -44,7 +45,7 @@ npm ci
 npm start
 ```
 
-The package declares Node.js >=18. CI defines versions 18, 20, 22, 24 and 26;
+The package declares Node.js >=20. CI defines versions 20, 22, 24 and 26;
 the Dockerfile installs Node.js 24 on Debian 13. `canvas` is native and may
 require build tools, Cairo and Pango if no prebuilt binary is available.
 Do not change dependencies to work around an environment failure.
@@ -57,8 +58,17 @@ Example images in `documentation/` must remain versioned.
 
 ## Behavior to preserve
 
-- The rendering endpoint is `POST /`; `OPTIONS /` returns 204 and
-  `Allow: POST`. Other paths return 404; other methods on `/` return 405.
+- The legacy rendering endpoint is `POST /`; `OPTIONS /` returns 204 and
+  `Allow: POST`. Other methods on `/` return 405.
+- `/mcp` serves the official SDK v2 Streamable HTTP tool `render_chart`.
+  Non-POST methods return 405. Other paths, including `/mcp/`, return 404.
+- MCP is stateless for modern and 2025 clients, limited to 5,000,000 body
+  bytes, 4096 pixels per dimension and 8,388,608 total pixels. Validate Host,
+  supplied Origin and selected integer dimensions before formatter execution.
+  Keep SDK protocol handling and a fresh server factory per request.
+- Default MCP allowlists permit loopback hosts and HTTP/HTTPS loopback
+  origins. Explicit origins match exact scheme/host/port. See
+  `documentation/mcp.md` for configuration. These guards apply only to MCP.
 - `HOST` defaults to `localhost`; `PORT` defaults to 3000.
 - PNG is the default format. Only `X-Image-Format: svg` selects SVG.
 - Default dimensions are 700 x 400. Valid `X-Image-Width` / `X-Image-Height`
@@ -69,11 +79,14 @@ Example images in `documentation/` must remain versioned.
 
 Stringified `formatter` functions are evaluated using `Function` inside the
 process, without a sandbox. Do not describe untrusted input as safe.
-The server does not implement authentication, TLS or CORS. The body limit
+The server does not implement authentication, TLS or CORS. The root body limit
 uses string length, and there is no maximum image dimension or rendering
 timeout. Review these points when changing exposure or validation.
-Rendering errors may throw uncaught exceptions; do not promise an HTTP 500
-response for every rendering failure.
+Root rendering errors may throw uncaught exceptions; do not promise an HTTP
+500 response for every root rendering failure. MCP catches renderer errors
+and returns generic tool errors without exception details. Dispose ECharts
+instances in `finally` and preserve synchronous rendering without claiming a
+cancellable timeout.
 
 ## Validation
 

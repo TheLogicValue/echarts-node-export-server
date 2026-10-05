@@ -9,3 +9,4 @@ Currently the following documentation exists:
 * [Installation guide for Node.js](./installation-node-js.md)
 * [Troubleshooting FAQ](./troubleshooting-faq.md)
 * [Setup with Docker](./docker.md)
+* [MCP chart rendering](./mcp.md)

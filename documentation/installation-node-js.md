@@ -1,8 +1,7 @@
 # Installation of Node.js
 
 Since this a Node.js application, Node.js is obviously required to run it.
-I recommend to use a supported LTS version of Node.js, for example version 20.
-Using an older version of Node.js may work, but it is not recommended.
+Node.js 20 or later is required by the application and the MCP SDK.
 
 ## Node.js on Windows
 
@@ -12,7 +11,7 @@ installer package and install it.
 ## Node.js on Linux
 
 If your Linux distribution does not provide a recent Node.js version (at least
-version 20 is recommended), you can add an (unofficial) Node.js package
+version 20 is required), you can add an (unofficial) Node.js package
 repository to your system.
 
 ### Debian-based

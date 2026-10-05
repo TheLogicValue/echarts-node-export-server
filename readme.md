@@ -8,12 +8,21 @@ repository, and PNG rendering uses the native `canvas` package. The response
 contains the image itself; the server does not save it to disk. Animation is
 disabled for both output formats.
 
+Streamable HTTP MCP is also available at `/mcp` on the same listener. Its
+`render_chart` tool returns inline PNG or SVG results using the existing
+renderer. See [MCP chart rendering](./documentation/mcp.md) for the arguments,
+SDK client example, stateless compatibility and internal access configuration.
+Only trusted inputs are supported: formatter functions execute unsandboxed
+inside this process. MCP applies Host/Origin checks, a 5,000,000-byte body
+limit, 4096-pixel dimension bounds and an 8,388,608-pixel area limit.
+
 ## Project layout
 
 | Path | Purpose |
 | ---- | ------- |
 | `export-server/server.js` | HTTP endpoint and host/port configuration |
 | `export-server/ssr.js` | Image dimensions, formatter functions and rendering |
+| `export-server/mcp.js` | MCP tool, transport, validation and limits |
 | `export-server/echarts.v5.6.0.min.js` | Bundled ECharts library |
 | `export-server/package.json` / `package-lock.json` | npm dependency manifest and lockfile |
 | `export-server/tests/` | HTTP and chart tests using the Node.js test runner |
@@ -26,7 +35,7 @@ disabled for both output formats.
 
 This application needs the following prerequisites:
 
-* Node.js 18 or later, as declared in `export-server/package.json`
+* Node.js 20 or later, as declared in `export-server/package.json`
 * npm
 * internet connection to download required dependencies (only once before
   first start)
@@ -340,7 +349,7 @@ workflow if other Node.js applications are running.
 
 The suite covers HTTP methods, invalid requests, PNG/SVG responses, dimensions,
 formatter function strings and several chart types. GitHub Actions and GitLab
-CI define Node.js 18, 20, 22, 24 and 26 jobs; GitHub also defines Docker build,
+CI define Node.js 20, 22, 24 and 26 jobs; GitHub also defines Docker build,
 Alpine dependency installation and npm audit workflows. Local checks do not
 confirm those remote jobs have passed.
 

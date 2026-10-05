@@ -22,6 +22,7 @@ const http = require('http');
 const path = require('path');
 const ssr = require('./ssr.js');
 const url = require('url');
+const mcp = require('./mcp.js').createEndpoint();
 
 // Use hostname from environment variable HOST, if it is set.
 const hostname = process.env.HOST || 'localhost';
@@ -43,6 +44,10 @@ const port = (parsedPort && parsedPort > 0 && parsedPort < 65536) ? parsedPort :
 const server = http.createServer(function(req, res) {
   // ---- Handle invalid URL requests ----
   const file = url.parse(req.url);
+  if (file.pathname === '/mcp') {
+    void mcp.handle(req, res);
+    return;
+  }
   if (file.pathname !== '/') {
     // It is an invalid file request.
     res.statusCode = 404;
@@ -126,3 +131,21 @@ server.on('clientError', function(err, socket) {
 server.listen(port, hostname, function() {
   console.log('=> Server running at http://' + hostname + ':' +port + '/');
 });
+
+let stopping = false;
+async function shutdown() {
+  if (stopping) return;
+  stopping = true;
+  const forceClose = setTimeout(() => server.closeAllConnections(), 5000);
+  forceClose.unref();
+  server.once('close', () => clearTimeout(forceClose));
+  server.close();
+  try {
+    await mcp.close();
+  } catch (error) {
+    console.error('MCP shutdown failed.');
+    process.exitCode = 1;
+  }
+}
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

@@ -90,14 +90,13 @@ function render_svg(jsonData, width, height) {
     height: height
   });
 
-  jsonData.animation = false;
-  chart.setOption(jsonData);
-
-  const svg_data = chart.renderToSVGString();
-  return {
-    success: true,
-    data: svg_data
-  };
+  try {
+    jsonData.animation = false;
+    chart.setOption(jsonData);
+    return { success: true, data: chart.renderToSVGString() };
+  } finally {
+    chart.dispose();
+  }
 }
 
 /* Renders JSON data for a ECharts plot into a PNG image.
@@ -118,14 +117,13 @@ function render_png(jsonData, width, height) {
   const canvas = createCanvas(width, height);
   const chart = echarts.init(canvas);
 
-  jsonData.animation = false;
-  chart.setOption(jsonData);
-
-  const png_data = canvas.toBuffer('image/png');
-  return {
-    success: true,
-    data: png_data
-  };
+  try {
+    jsonData.animation = false;
+    chart.setOption(jsonData);
+    return { success: true, data: canvas.toBuffer('image/png') };
+  } finally {
+    chart.dispose();
+  }
 }
 
 /* Renders JSON data for a ECharts plot into a PNG or SVG image.

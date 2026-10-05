@@ -12,6 +12,12 @@ change in this application.
 
 ## Next Version (2026-09-??)
 
+* __[feature, fork]__
+Add stateless Streamable HTTP MCP at `/mcp` with `render_chart`, inline PNG/SVG
+results, loopback Host/Origin defaults and MCP-specific resource limits.
+Require Node.js >=20 and use the official MCP SDK v2. Dispose rendered ECharts
+instances after successful or failed rendering.
+
 * __[maintenance]__
 Update dependency `node-abi` to 3.96.0.
 
