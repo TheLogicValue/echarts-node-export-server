@@ -58,7 +58,9 @@ async function startServer(t, configuredToken) {
 
 async function request(base, target, headers = {}, body = '{}', method = 'POST') {
   return new Promise((resolve, reject) => {
-    const req = http.request(base + target, { method, headers }, res => {
+    const address = new URL(base);
+    const req = http.request({ host: address.hostname, port: address.port,
+      path: target, method, headers }, res => {
       const chunks = [];
       res.on('data', data => chunks.push(data));
       res.on('error', reject);
@@ -134,6 +136,15 @@ test('valid token renders root PNG/SVG and restores routing behavior',
     assert.equal((await request(base, '/', headers, '', 'GET')).status, 405);
     assert.equal((await request(base, '/missing', headers)).status, 404);
     assert.equal((await request(base, '/mcp/', headers)).status, 404);
+    assert.equal((await request(base, '/?source=test', headers, '',
+      'GET')).status, 405);
+    assert.equal((await request(base, '/mcp?source=test', headers, '',
+      'GET')).status, 405);
+    for (const normalizedPath of ['/charts/../', '/charts/../mcp',
+      '/%2e/mcp', '//another-host/mcp']) {
+      assert.equal((await request(base, normalizedPath, headers)).status,
+        404);
+    }
   });
 
 test('duplicate token headers are rejected even when both match', async t => {

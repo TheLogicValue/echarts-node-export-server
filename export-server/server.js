@@ -22,7 +22,6 @@ const http = require('http');
 const { createHash, timingSafeEqual } = require('node:crypto');
 const path = require('path');
 const ssr = require('./ssr.js');
-const url = require('url');
 const mcp = require('./mcp.js').createEndpoint();
 
 // An unset or empty token keeps the existing unauthenticated behavior.
@@ -62,12 +61,22 @@ const server = http.createServer(function(req, res) {
     }
   }
   // ---- Handle invalid URL requests ----
-  const file = url.parse(req.url);
-  if (file.pathname === '/mcp') {
+  let pathname;
+  try {
+    pathname = new URL(req.url, 'http://localhost').pathname;
+    // Keep strict routing for origin-form paths that URL() normalizes.
+    if (req.url.startsWith('/') &&
+        req.url.split(/[?#]/, 1)[0] !== pathname) pathname = undefined;
+  } catch (error) {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.end('Invalid request URL.\n');
+    return;
+  }
+  if (pathname === '/mcp') {
     void mcp.handle(req, res);
     return;
   }
-  if (file.pathname !== '/') {
+  if (pathname !== '/') {
     // It is an invalid file request.
     res.statusCode = 404;
     res.setHeader('Content-Type', 'text/plain');

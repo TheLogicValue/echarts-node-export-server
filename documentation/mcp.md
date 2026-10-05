@@ -6,8 +6,9 @@ Node.js >=20 is required. Install dependencies with `npm ci` and start with
 `npm start` from `export-server/`.
 
 The official MCP SDK v2 handles protocol framing and negotiation. Modern
-2026-07-28 requests use JSON responses; 2025 clients can initialize and make
-stateless calls. There are no sessions, GET SSE streams, `/sse`, or `/messages`
+2026-07-28 calls return JSON unless related notifications require an SSE stream.
+2025 clients can initialize and make stateless calls. There are no sessions,
+GET SSE streams, `/sse`, or `/messages`
 endpoints. GET, DELETE and other non-POST methods on `/mcp` return 405.
 `/mcp/` and other paths return 404. The original root API remains available.
 Raw ECharts JSON is for `POST /`; `/mcp` requires MCP protocol messages.

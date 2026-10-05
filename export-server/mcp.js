@@ -130,7 +130,7 @@ function createEndpoint(env = process.env) {
   const validateOrigin = originValidation(origins ?
     origins.map(origin => new URL(origin).hostname) : LOOPBACK);
   const handler = createMcpHandler(createChartServer, {
-    legacy: 'stateless', responseMode: 'json', maxRequestBodySize: MAX_BODY
+    legacy: 'stateless', maxRequestBodySize: MAX_BODY
   });
   const nodeHandler = toNodeHandler(handler, { maxRequestBodySize: MAX_BODY });
   return {

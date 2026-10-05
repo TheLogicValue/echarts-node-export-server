@@ -12,6 +12,10 @@ change in this application.
 
 ## Next Version (2026-09-??)
 
+* __[maintenance, fork]__
+Use the WHATWG URL API for request routing and the MCP SDK's automatic
+response mode, avoiding Node.js deprecation and dropped-notification warnings.
+
 * __[feature, fork]__
 Add optional `AUTH_TOKEN` authentication for all HTTP requests, including the
 root rendering API and MCP. Require the matching `X-Auth-Token` header when
