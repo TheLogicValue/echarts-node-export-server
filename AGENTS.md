@@ -171,6 +171,33 @@ Be clear and concise. Distinguish verified results, inferences and pending
 checks. Base repository instructions on its files; verify changing external
 information against current primary sources when necessary.
 
+You may open subagents when a task has independent work that benefits from
+parallel execution or a separate review. For a small, tightly coupled change,
+work directly. Do not create subagents solely to increase their number. The
+parent agent owns integration, final validation and the user-facing result.
+
+Choose each subagent's model for its specific assignment from the models
+available in the current session. Balance capability, speed and cost; give
+difficult or high-risk work enough reasoning and implementation capability:
+
+- Use a fast model such as `gpt-6-luna` for bounded documentation, inventory,
+  link checks or other routine, independent tasks.
+- Use a coding model such as `gpt-6.1-sol` for implementation, meaningful tests,
+  refactoring and CI changes.
+- Use a stronger reasoning model such as `gpt-6-astra` for complex architecture,
+  MCP protocol behavior, security-sensitive changes or independent review of
+  high-risk work.
+
+These are examples, not fixed role assignments. Consider task complexity,
+failure impact, speed and available models before each delegation. If the
+preferred model is unavailable, select the best available alternative. Give
+each subagent a concrete outcome, relevant context, owned files or a read-only
+review scope, and the checks it should perform. Coordinate shared files so
+agents do not overwrite each other's work. Review their findings and changes;
+do not treat a subagent's report as a substitute for the required checks before
+a commit. Subagents do not inherit permission to commit, push, deploy or send
+messages to others beyond what the user has authorized for the task.
+
 When presenting real subagents, assign each a randomly chosen animal emoji
 and a short task label. Keep its emoji throughout the task and avoid reusing
 emojis among active subagents while alternatives remain available. This rule
